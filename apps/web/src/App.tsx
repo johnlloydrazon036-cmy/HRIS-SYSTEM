@@ -11,7 +11,7 @@ import EmployeeList from "./pages/personal-records/EmployeeList";
 import EmployeeProfile from "./pages/personal-records/EmployeeProfile";
 
 // Attendance
-import AttendanceTable from "./pages/attendance/AttendanceTable";
+import AdminAttendance from "./pages/attendance/admin/AdminAttendance";
 
 // Leave Management
 import LeaveManagement from "./pages/leave/LeaveManagement";
@@ -24,7 +24,7 @@ import GovernmentCompliance from "./pages/compliance/GovernmentCompliance";
 
 // Employee Self-Service
 import EmployeeSelfService from "./pages/self-service/EmployeeSelfService";
-import MyAttendance from "./pages/self-service/MyAttendance";
+import UserAttendance from "./pages/attendance/user/UserAttendance";
 
 // User Pages
 import MyPaySlips from "./pages/user/MyPaySlips";
@@ -142,7 +142,7 @@ export default function App() {
             path="attendance"
             element={
               <AdminOnly>
-                <AttendanceTable />
+                <AdminAttendance />
               </AdminOnly>
             }
           />
@@ -198,7 +198,7 @@ export default function App() {
           {/* Shared routes */}
           <Route path="compliance" element={<GovernmentCompliance />} />
           <Route path="leave" element={<LeaveManagement />} />
-          <Route path="my-attendance" element={<MyAttendance />} />
+          <Route path="my-attendance" element={<UserAttendance />} />
           <Route path="self-service" element={<EmployeeSelfService />} />
 
           {/* User Pages */}

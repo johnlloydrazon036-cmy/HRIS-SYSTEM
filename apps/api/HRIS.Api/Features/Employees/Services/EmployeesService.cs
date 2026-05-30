@@ -348,7 +348,7 @@ public class EmployeesService
                         module: "EMPLOYEES",
                         targetType: "Employee",
                         targetId: entity.Id.ToString(),
-                        summary: $"Created employee {entity.EmployeeNumber} ({string.Join(" ", new[] { entity.FirstName, entity.MiddleName, entity.LastName }.Where(x => !string.IsNullOrWhiteSpace(x)))})",
+                        summary: $"Created employee {entity.EmployeeNumber} ({BuildDisplayName(entity.FirstName, entity.MiddleName, entity.LastName, user.Suffix)})",
                         ipAddress: httpContext.Connection.RemoteIpAddress?.ToString(),
                         userAgent: httpContext.Request.Headers["User-Agent"].ToString()
                     );
@@ -360,6 +360,7 @@ public class EmployeesService
                     }
                 }
 
+                entity.User = user;
                 return (true, null, ToDto(entity));
             }
             catch (DbUpdateException ex) when (IsEmployeeNumberUniqueConflict(ex) && attempt < maxEmployeeNumberAttempts)
@@ -565,8 +566,11 @@ public class EmployeesService
 
         if (httpContext is not null)
         {
-            var fullName = string.Join(" ", new[] { entity.FirstName, entity.MiddleName, entity.LastName }
-                .Where(x => !string.IsNullOrWhiteSpace(x)));
+            var fullName = BuildDisplayName(
+                entity.FirstName,
+                entity.MiddleName,
+                entity.LastName,
+                entity.User?.Suffix);
 
             var statusChanged = previousIsActive != entity.IsActive;
 
@@ -618,8 +622,11 @@ public class EmployeesService
 
         if (httpContext is not null)
         {
-            var fullName = string.Join(" ", new[] { entity.FirstName, entity.MiddleName, entity.LastName }
-                .Where(x => !string.IsNullOrWhiteSpace(x)));
+            var fullName = BuildDisplayName(
+                entity.FirstName,
+                entity.MiddleName,
+                entity.LastName,
+                entity.User?.Suffix);
 
             var statusLabel = entity.IsActive ? "Active" : "Inactive";
 
@@ -754,19 +761,71 @@ public class EmployeesService
         return parts.Length > 1 ? parts[^1] : "Unknown";
     }
 
+    private static string? NormalizeNamePart(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    }
+
+    private static string? GetMiddleInitial(string? middleName)
+    {
+        var normalized = NormalizeNamePart(middleName);
+        if (string.IsNullOrWhiteSpace(normalized)) return null;
+
+        return $"{char.ToUpperInvariant(normalized[0])}.";
+    }
+
+    private static string BuildDisplayName(
+        string? firstName,
+        string? middleName,
+        string? lastName,
+        string? suffix)
+    {
+        var normalizedFirstName = NormalizeNamePart(firstName);
+        var normalizedLastName = NormalizeNamePart(lastName);
+        var normalizedSuffix = NormalizeNamePart(suffix);
+        var middleInitial = GetMiddleInitial(middleName);
+
+        var givenNameParts = new[]
+        {
+            normalizedFirstName,
+            middleInitial
+        }.Where(x => !string.IsNullOrWhiteSpace(x));
+
+        var givenName = string.Join(" ", givenNameParts);
+
+        var displayName = string.IsNullOrWhiteSpace(normalizedLastName)
+            ? givenName
+            : string.IsNullOrWhiteSpace(givenName)
+                ? normalizedLastName
+                : $"{normalizedLastName}, {givenName}";
+
+        if (!string.IsNullOrWhiteSpace(normalizedSuffix))
+            displayName = string.IsNullOrWhiteSpace(displayName)
+                ? normalizedSuffix
+                : $"{displayName}, {normalizedSuffix}";
+
+        return string.IsNullOrWhiteSpace(displayName) ? "Unknown Employee" : displayName;
+    }
+
     private static EmployeeDto ToDto(Employee e)
     {
         var todayUtc = DateOnly.FromDateTime(DateTime.UtcNow.Date);
         var newHireCutoff = todayUtc.AddDays(-7);
 
+        var firstName = e.User != null ? e.User.FirstName ?? e.FirstName : e.FirstName;
+        var middleName = e.User != null ? e.User.MiddleName : e.MiddleName;
+        var lastName = e.User != null ? e.User.LastName ?? e.LastName : e.LastName;
+        var suffix = e.User != null ? e.User.Suffix : null;
+
         return new EmployeeDto
         {
             Id = e.Id,
             EmployeeNumber = e.EmployeeNumber,
-            FirstName = e.User != null ? e.User.FirstName ?? e.FirstName : e.FirstName,
-            MiddleName = e.User != null ? e.User.MiddleName : e.MiddleName,
-            LastName = e.User != null ? e.User.LastName ?? e.LastName : e.LastName,
-            Suffix = e.User != null ? e.User.Suffix : null,
+            FirstName = firstName,
+            MiddleName = middleName,
+            LastName = lastName,
+            Suffix = suffix,
+            FullName = BuildDisplayName(firstName, middleName, lastName, suffix),
 
             BirthDate = e.BirthDate,
             Sex = e.Sex,
@@ -812,6 +871,23 @@ public class EmployeesService
             MiddleName = e.User != null ? e.User.MiddleName : e.MiddleName,
             LastName = e.User != null ? (e.User.LastName ?? e.LastName) : e.LastName,
             Suffix = e.User != null ? e.User.Suffix : null,
+            FullName =
+                (
+                    string.IsNullOrWhiteSpace(e.User != null ? (e.User.LastName ?? e.LastName) : e.LastName)
+                        ? ""
+                        : (e.User != null ? (e.User.LastName ?? e.LastName) : e.LastName) + ", "
+                ) +
+                (e.User != null ? (e.User.FirstName ?? e.FirstName) : e.FirstName) +
+                (
+                    string.IsNullOrWhiteSpace(e.User != null ? e.User.MiddleName : e.MiddleName)
+                        ? ""
+                        : " " + (e.User != null ? e.User.MiddleName : e.MiddleName)!.Substring(0, 1).ToUpper() + "."
+                ) +
+                (
+                    string.IsNullOrWhiteSpace(e.User != null ? e.User.Suffix : null)
+                        ? ""
+                        : ", " + (e.User != null ? e.User.Suffix : null)
+                ),
 
             BirthDate = e.BirthDate,
             Sex = e.Sex,

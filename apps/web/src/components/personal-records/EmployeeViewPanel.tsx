@@ -3,13 +3,17 @@ import { createPortal } from "react-dom";
 import { FileText, X } from "lucide-react";
 import { toast } from "sonner";
 import type { EmployeeStatus } from "../../lib/employees";
-import type { EmploymentType } from "./EmployeeFormFields";
 import { EMPLOYEE_TABS, type EmployeeTabKey } from "./employeeTabs";
 import { useEmployeeDocuments } from "../../pages/personal-records/hooks/useEmployeeDocuments";
 import { EmployeeDocumentsPanel } from "./EmployeeDocumentsPanel";
 import type { EmployeeDocumentDto } from "../../lib/employees";
 import { formatEmploymentTypeLabel } from "./employeeList.utils";
 
+type EmploymentType =
+  | "Regular"
+  | "Probationary"
+  | "Project-based";
+  
 export type EmployeeView = {
   id?: string;
   employeeId: string;
@@ -40,7 +44,6 @@ type PreviewState = {
 
 const statusBadge: Record<EmployeeStatus, string> = {
   Active: "badge-success",
-  "On Leave": "badge-warning",
   Inactive: "badge-danger",
 };
 
@@ -340,7 +343,7 @@ export function EmployeeViewPanel({
     .join(", ");
 
   return createPortal(
-    <div className="pro-modal-overlay !justify-end">
+    <div className="fixed inset-0 z-[9999] flex justify-end overflow-hidden bg-slate-900/55 backdrop-blur-[4px]">
       <div className="absolute inset-0 z-0" onClick={handleClose} />
 
       {activeTab === "documents" && (
@@ -358,7 +361,8 @@ export function EmployeeViewPanel({
                 <div className="h-full w-full overflow-hidden rounded-2xl border border-white/30 bg-white shadow-2xl">
                   <iframe
                     src={preview.url}
-                    title={preview.fileName || "Document preview"}
+                    title={preview.fileName || "Document preview"
+                    }
                     className="h-full w-full"
                   />
                 </div>

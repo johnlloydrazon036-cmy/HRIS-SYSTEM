@@ -119,11 +119,11 @@ const Sidebar = ({
   ];
 
   const userNav: NavItem[] = [
-    { icon: Newspaper, label: "Company News", path: "/dashboard/company-news" },
     { icon: Clock, label: "Attendance Log", path: "/dashboard/my-attendance" },
     { icon: FileText, label: "Leave Management", path: "/dashboard/leave" },
-    { icon: DollarSign, label: "My Pay Slips", path: "/dashboard/my-payslips" },
     { icon: BarChart3, label: "My Performance", path: "/dashboard/my-performance" },
+    { icon: DollarSign, label: "Payroll", path: "/dashboard/my-payslips" },
+    { icon: Newspaper, label: "Company News", path: "/dashboard/company-news" },
     { icon: ClipboardList, label: "Daily Report", path: "/dashboard/daily-report" },
     { icon: Building2, label: "Company Directory", path: "/dashboard/company-directory" },
     { icon: HelpCircle, label: "Help & Support", path: "/dashboard/help-support" },

@@ -1,0 +1,292 @@
+body {
+  background: #0f172a !important;
+}
+
+.swagger-ui {
+  background: #0f172a !important;
+  color: #e2e8f0 !important;
+}
+
+/* Top bar */
+
+.swagger-ui .topbar {
+  background: #111827 !important;
+  border-bottom: 1px solid #1e293b !important;
+}
+
+.swagger-ui .scheme-container {
+  background: #111827 !important;
+  box-shadow: none !important;
+  border-bottom: 1px solid #1e293b !important;
+}
+
+/* Text */
+
+.swagger-ui .info .title,
+.swagger-ui .info h1,
+.swagger-ui .info h2,
+.swagger-ui .info h3,
+.swagger-ui .info p,
+.swagger-ui .info a,
+.swagger-ui .opblock-tag,
+.swagger-ui .opblock-summary-path,
+.swagger-ui .opblock-summary-description,
+.swagger-ui .parameter__name,
+.swagger-ui .parameter__type,
+.swagger-ui .parameter__in,
+.swagger-ui .parameters-col_name,
+.swagger-ui .parameters-col_description,
+.swagger-ui .response-col_status,
+.swagger-ui .response-col_description,
+.swagger-ui .response-col_links,
+.swagger-ui .responses-table th,
+.swagger-ui label,
+.swagger-ui span,
+.swagger-ui td,
+.swagger-ui th,
+.swagger-ui p,
+.swagger-ui h4,
+.swagger-ui h5 {
+  color: #e2e8f0 !important;
+}
+
+/* Operation blocks */
+
+.swagger-ui .opblock {
+  background: #111827 !important;
+  border-color: #334155 !important;
+  box-shadow: none !important;
+}
+
+.swagger-ui .opblock .opblock-summary {
+  background: #111827 !important;
+  border-color: #334155 !important;
+}
+
+.swagger-ui .opblock-body,
+.swagger-ui .parameters-container,
+.swagger-ui .request-body,
+.swagger-ui .responses-wrapper,
+.swagger-ui .responses-inner,
+.swagger-ui .tab,
+.swagger-ui .opblock-section-header {
+  background: #0f172a !important;
+}
+
+.swagger-ui .opblock-section-header {
+  border-color: #1e293b !important;
+  box-shadow: none !important;
+}
+
+.swagger-ui .responses-table th,
+.swagger-ui .response-col_status,
+.swagger-ui .response-col_description,
+.swagger-ui .tab li {
+  background: #0f172a !important;
+  color: #e2e8f0 !important;
+}
+
+.swagger-ui .tab li button.tablinks {
+  background: transparent !important;
+  color: #e2e8f0 !important;
+}
+
+.swagger-ui .tab li.active button.tablinks {
+  border-bottom: 2px solid #22c55e !important;
+}
+
+/* Inputs / dropdowns */
+
+.swagger-ui input,
+.swagger-ui textarea,
+.swagger-ui select,
+.swagger-ui .content-type select {
+  background: #111827 !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+  box-shadow: none !important;
+}
+
+.swagger-ui input::placeholder,
+.swagger-ui textarea::placeholder {
+  color: #64748b !important;
+}
+
+.swagger-ui select {
+  color-scheme: dark;
+}
+
+/* Buttons */
+
+.swagger-ui .btn {
+  background: #111827 !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+  box-shadow: none !important;
+}
+
+.swagger-ui .btn.try-out__btn {
+  background: #111827 !important;
+  color: #f8fafc !important;
+  border: 1px solid #64748b !important;
+}
+
+.swagger-ui .btn.execute {
+  background: #3b82f6 !important;
+  color: #ffffff !important;
+  border-color: #3b82f6 !important;
+}
+
+.swagger-ui .btn.authorize {
+  background: transparent !important;
+  color: #34d399 !important;
+  border-color: #34d399 !important;
+}
+
+.swagger-ui .btn.authorize svg {
+  fill: #34d399 !important;
+}
+
+/* Icons / arrows */
+
+.swagger-ui svg,
+.swagger-ui .arrow,
+.swagger-ui .expand-operation,
+.swagger-ui .opblock-control-arrow svg,
+.swagger-ui .authorization__btn svg,
+.swagger-ui .locked svg,
+.swagger-ui .unlocked svg,
+.swagger-ui section.models svg {
+  fill: #f8fafc !important;
+  color: #f8fafc !important;
+}
+
+.swagger-ui .model-toggle,
+.swagger-ui .model-toggle::after {
+  filter: invert(1) brightness(2) !important;
+}
+
+/* Code blocks */
+
+.swagger-ui textarea,
+.swagger-ui .body-param textarea,
+.swagger-ui .highlight-code,
+.swagger-ui pre,
+.swagger-ui .microlight,
+.swagger-ui .curl-command,
+.swagger-ui .request-url pre,
+.swagger-ui .response-col_description pre {
+  background: #020617 !important;
+  color: #e2e8f0 !important;
+  border: 1px solid #1e293b !important;
+}
+
+/* Tables */
+
+.swagger-ui table tbody tr td,
+.swagger-ui table thead tr th {
+  background: #0f172a !important;
+  border-color: #1e293b !important;
+}
+
+/* Schemas */
+
+.swagger-ui section.models {
+  background: #0f172a !important;
+  border: 1px solid #1e293b !important;
+}
+
+.swagger-ui section.models .model-container {
+  background: #111827 !important;
+  border-color: #1e293b !important;
+}
+
+.swagger-ui .model,
+.swagger-ui .model-title,
+.swagger-ui .model-toggle,
+.swagger-ui .property-row,
+.swagger-ui .prop-type,
+.swagger-ui .prop-format {
+  color: #e2e8f0 !important;
+}
+
+/* Live server response colors */
+
+.swagger-ui .live-responses-table tbody tr td:first-child,
+.swagger-ui .responses-wrapper .responses-table tbody tr td:first-child {
+  font-weight: 700 !important;
+}
+
+/* Keep live response statuses neutral unless a status-specific selector is available */
+
+.swagger-ui .live-responses-table tbody tr td.response-col_status,
+.swagger-ui .responses-wrapper .responses-table tbody tr td.response-col_status {
+  color: inherit !important;
+}
+
+/* Explicit live 401 */
+
+.swagger-ui .live-responses-table tbody tr td:first-child {
+  color: #e2e8f0 !important;
+}
+
+/* Fallback undocumented */
+
+.swagger-ui .response-undocumented {
+  color: #fb7185 !important;
+  font-style: italic !important;
+}
+
+/* Static documented responses */
+
+.swagger-ui .responses-table tr.response[data-code^="2"] .response-col_status,
+.swagger-ui .responses-table tr.response[data-code^="2"] .response-col_description {
+  color: #22c55e !important;
+}
+
+.swagger-ui .responses-table tr.response[data-code^="3"] .response-col_status,
+.swagger-ui .responses-table tr.response[data-code^="3"] .response-col_description {
+  color: #38bdf8 !important;
+}
+
+.swagger-ui .responses-table tr.response[data-code="400"] .response-col_status,
+.swagger-ui .responses-table tr.response[data-code="400"] .response-col_description,
+.swagger-ui .responses-table tr.response[data-code="401"] .response-col_status,
+.swagger-ui .responses-table tr.response[data-code="401"] .response-col_description {
+  color: #fb7185 !important;
+}
+
+.swagger-ui .responses-table tr.response[data-code="403"] .response-col_status,
+.swagger-ui .responses-table tr.response[data-code="403"] .response-col_description {
+  color: #facc15 !important;
+}
+
+.swagger-ui .responses-table tr.response[data-code="404"] .response-col_status,
+.swagger-ui .responses-table tr.response[data-code="404"] .response-col_description {
+  color: #fb923c !important;
+}
+
+.swagger-ui .responses-table tr.response[data-code^="5"] .response-col_status,
+.swagger-ui .responses-table tr.response[data-code^="5"] .response-col_description {
+  color: #ef4444 !important;
+}
+
+/* Modal */
+
+.swagger-ui .dialog-ux .modal-ux {
+  background: #111827 !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+}
+
+.swagger-ui .dialog-ux .modal-ux-header,
+.swagger-ui .dialog-ux .modal-ux-content,
+.swagger-ui .dialog-ux .modal-ux-footer {
+  background: #111827 !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+.swagger-ui .dialog-ux .modal-ux-header h3 {
+  color: #f8fafc !important;
+}

@@ -47,9 +47,20 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
             },
             new Permission
             {
-                Id = 2,
+                Id = 6,
                 RoleId = 1,
                 Module = "EMPLOYEES",
+                CanView = true,
+                CanCreate = true,
+                CanUpdate = true,
+                CanArchive = true,
+                CreatedAt = new DateTime(2026, 2, 23, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Permission
+            {
+                Id = 9,
+                RoleId = 1,
+                Module = "ATTENDANCE",
                 CanView = true,
                 CanCreate = true,
                 CanUpdate = true,
@@ -71,9 +82,20 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
             },
             new Permission
             {
-                Id = 4,
+                Id = 7,
                 RoleId = 2,
                 Module = "EMPLOYEES",
+                CanView = true,
+                CanCreate = true,
+                CanUpdate = true,
+                CanArchive = true,
+                CreatedAt = new DateTime(2026, 2, 23, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Permission
+            {
+                Id = 10,
+                RoleId = 2,
+                Module = "ATTENDANCE",
                 CanView = true,
                 CanCreate = true,
                 CanUpdate = true,
@@ -84,10 +106,21 @@ public class PermissionConfiguration : IEntityTypeConfiguration<Permission>
             // USER
             new Permission
             {
-                Id = 5,
+                Id = 8,
                 RoleId = 3,
                 Module = "EMPLOYEES",
-                CanView = true,
+                CanView = false,
+                CanCreate = false,
+                CanUpdate = false,
+                CanArchive = false,
+                CreatedAt = new DateTime(2026, 2, 23, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new Permission
+            {
+                Id = 11,
+                RoleId = 3,
+                Module = "ATTENDANCE",
+                CanView = false,
                 CanCreate = false,
                 CanUpdate = false,
                 CanArchive = false,

@@ -591,6 +591,15 @@ textarea {
   background: #f59e0b;
 }
 
+.badge-undertime {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.badge-undertime .badge-dot {
+  background: #f97316;
+}
+
 .badge-danger {
   background: #fee2e2;
   color: #b91c1c;
@@ -625,12 +634,19 @@ textarea {
 .pro-modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(15, 23, 42, 0.5);
+  width: 100vw;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: rgba(15, 23, 42, 0.55);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 50;
+  padding: 1.5rem;
+  z-index: 9999;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   animation: fadeIn 0.2s ease-out;
 }
 
@@ -639,8 +655,9 @@ textarea {
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-2xl);
   width: 100%;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: calc(100vh - 3rem);
+  max-height: calc(100dvh - 3rem);
+  overflow: hidden;
   animation: scaleIn 0.25s ease-out;
 }
 
@@ -660,6 +677,7 @@ textarea {
 
 .pro-modal-body {
   padding: 1.5rem;
+  overflow-y: auto;
 }
 
 .pro-modal-footer {
@@ -1021,4 +1039,52 @@ input:-webkit-autofill:focus {
   -webkit-text-fill-color: var(--color-text);
   caret-color: var(--color-text);
   box-shadow: 0 0 0px 1000px var(--color-surface) inset;
+}
+
+/* Success Toast Animations */
+.success-toast-icon {
+  animation: successToastPop 0.3s ease-out;
+}
+
+.success-toast-progress {
+  animation: successToastProgress 3s linear forwards;
+}
+@keyframes successToastPop {
+  0% {
+    transform: scale(0.72);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes successToastProgress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* Row pulse animation for recently edited rows in Admin DTR Table */
+@keyframes pulseRow {
+  0% {
+    background-color: #dcfce7;
+  }
+  40% {
+    background-color: #bbf7d0;
+  }
+  80% {
+    background-color: #dcfce7;
+  }
+  100% {
+    background-color: #f0fdf4;
+  }
 }

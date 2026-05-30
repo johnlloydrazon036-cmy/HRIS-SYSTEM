@@ -11,6 +11,8 @@ public class EmployeeDto
     public string LastName { get; set; } = default!;
     public string? Suffix { get; set; }
 
+    public string FullName { get; set; } = string.Empty;
+
     public DateOnly? BirthDate { get; set; }
     public string? Sex { get; set; }
     public string? CivilStatus { get; set; }
