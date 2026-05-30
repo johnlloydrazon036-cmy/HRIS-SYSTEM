@@ -41,7 +41,7 @@ type SharedSessionAuthPayload = {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL as string;
+const API_BASE_URL = "http://localhost:5169";
 
 const AUTH_USER_KEY = "auth.user";
 const AUTH_TOKEN_KEY = "auth.token";

@@ -1,5 +1,5 @@
 // apps/web/src/pages/DailyReport/DailyAccomplishmentReport.tsx
-import { useState, useCallback, useEffect } from "react";  // ← added useEffect
+import { useState, useCallback, useEffect } from "react";
 
 import {
   Clock, CheckCircle, AlertTriangle, Lock,
@@ -49,13 +49,10 @@ function calcHours(timeIn: string, timeOut: string, breakMins: number) {
   return { gross: fmt(grossMins), net: netMins > 0 ? fmt(netMins) : "0h 0m" };
 }
 
-// ─── NEW: Convert "07:55 AM" / "5:30 PM" or "07:55" → "07:55" (24-hr for <input type="time">)
 function to24Hour(time: string): string {
   if (!time || time === "-") return "";
   const trimmed = time.trim();
-  // Already HH:MM 24-hour
   if (/^\d{2}:\d{2}$/.test(trimmed)) return trimmed;
-  // 12-hour with AM/PM e.g. "07:55 AM" or "5:30 PM"
   const match = trimmed.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
   if (!match) return "";
   let hours = parseInt(match[1], 10);
@@ -134,8 +131,6 @@ export default function DailyAccomplishmentReport() {
   const [breakMins, setBreakMins] = useState(60);
   const [subTime, setSubTime] = useState("");
 
-
-
   const [standup, setStandup] = useState<StandupAttended>("Yes");
   const [reachable, setReachable] = useState<Reachable>("Yes");
   const [avgResponse, setAvgResponse] = useState("");
@@ -164,13 +159,7 @@ export default function DailyAccomplishmentReport() {
 
   const [showPreview, setShowPreview] = useState(false);
 
-  // ─── NEW: Auto-fetch Time In / Time Out from Attendance Log ────────────────
-  //
-  // AttendanceTable saves records to localStorage key "attendance_logs".
-  // Each entry has: { timeIn, timeOut, status, date? }
-  // We look for the entry matching today's date, or fall back to the latest.
-  // Time values may arrive as "07:55 AM" (12-hr) or "07:55" (24-hr) — both handled.
-  //
+  // ─── Auto-fetch Time In / Time Out from Attendance Log ────────────────
   const fetchAttendanceTime = useCallback(() => {
     try {
       const saved = localStorage.getItem("attendance_logs");
@@ -180,8 +169,6 @@ export default function DailyAccomplishmentReport() {
         JSON.parse(saved);
       if (!Array.isArray(logs) || logs.length === 0) return;
 
-      // Prefer an entry whose date matches the currently selected report date,
-      // then fall back to the latest entry in the array.
       const match =
         logs.find((l) => l.date === date) ?? logs[logs.length - 1];
 
@@ -189,16 +176,12 @@ export default function DailyAccomplishmentReport() {
 
       if (match.timeIn && match.timeIn !== "-") {
         const converted = to24Hour(match.timeIn);
-        if (converted) {
-          setTimeIn(converted);
-        }
+        if (converted) setTimeIn(converted);
       }
 
       if (match.timeOut && match.timeOut !== "-") {
         const converted = to24Hour(match.timeOut);
-        if (converted) {
-          setTimeOut(converted);
-        }
+        if (converted) setTimeOut(converted);
       }
     } catch {
       // Silently ignore parse errors
@@ -206,14 +189,11 @@ export default function DailyAccomplishmentReport() {
   }, [date]);
 
   useEffect(() => {
-    // Run once on mount and whenever the selected date changes
     fetchAttendanceTime();
 
-    // Also react to storage changes (e.g. when AttendanceTable writes a new log)
     const handleStorage = () => fetchAttendanceTime();
     window.addEventListener("storage", handleStorage);
 
-    // Poll every 3 s in case same-tab localStorage writes don't fire "storage"
     const interval = setInterval(fetchAttendanceTime, 3000);
 
     return () => {
@@ -221,7 +201,6 @@ export default function DailyAccomplishmentReport() {
       clearInterval(interval);
     };
   }, [fetchAttendanceTime]);
-  // ──────────────────────────────────────────────────────────────────────────
 
   // ── Computed ──
 
@@ -242,6 +221,7 @@ export default function DailyAccomplishmentReport() {
   }, []);
 
   const addRow = () => setTasks(prev => [...prev, createEmptyTask(prev.length + 1)]);
+  const deleteRow = (id: number) => setTasks(prev => prev.filter(t => t.id !== id));
 
   const toggleCheck = (i: number) => setChecklist(prev => prev.map((v, idx) => idx === i ? !v : v));
 
@@ -337,7 +317,6 @@ export default function DailyAccomplishmentReport() {
 
         {/* Time In / Time Out */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
-
           <Field label="Time In">
             <input
               className="pro-input"
@@ -406,39 +385,57 @@ export default function DailyAccomplishmentReport() {
           <Plus className="w-4 h-4" /> Add Task Row
         </button>
       }>
+        {/* TABLE 1: Main info — #, C/O, Priority, Task Type, Ticket, Description, Module, Status */}
         <div className="overflow-x-auto rounded-xl border border-gray-100">
-          <table className="pro-table">
+          <table className="pro-table" style={{ width: "100%", tableLayout: "fixed", minWidth: "860px" }}>
+            <colgroup>
+              <col style={{ width: "40px" }} />
+              <col style={{ width: "70px" }} />
+              <col style={{ width: "110px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "120px" }} />
+              <col />
+              <col style={{ width: "130px" }} />
+              <col style={{ width: "150px" }} />
+            </colgroup>
             <thead>
               <tr>
-                {["#","C/O","Priority","Task Type","Ticket / Ref","Task Description","Module","Status","% Done","Est. Hrs","Actual Hrs","Output / Deliverable","Commit / PR","Remarks"].map(h => (
-                  <th key={h}>{h}</th>
+                {["#","C/O","Priority","Task Type","Ticket / Ref","Task Description","Module","Status"].map(h => (
+                  <th key={h} style={{ whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {tasks.map(task => (
                 <tr key={task.id}>
-                  <td className="text-center text-gray-400 font-semibold text-xs w-8">{task.id}</td>
+                  <td className="text-center text-gray-400 font-semibold text-xs">{task.id}</td>
                   <td>
-                    <select className="pro-select text-xs py-1" value={task.carryOver} onChange={e => updateTask(task.id, "carryOver", e.target.value)}>
-                      <option value="">—</option><option>Yes</option><option>No</option>
-                    </select>
+                    <div className="flex flex-col gap-1 items-start">
+                      <label className="flex items-center gap-1 text-xs cursor-pointer">
+                        <input type="checkbox" className="accent-emerald-600 w-3.5 h-3.5" checked={task.carryOver === "Yes"} onChange={() => updateTask(task.id, "carryOver", task.carryOver === "Yes" ? "" : "Yes")} />
+                        <span className="text-gray-600">Yes</span>
+                      </label>
+                      <label className="flex items-center gap-1 text-xs cursor-pointer">
+                        <input type="checkbox" className="accent-rose-500 w-3.5 h-3.5" checked={task.carryOver === "No"} onChange={() => updateTask(task.id, "carryOver", task.carryOver === "No" ? "" : "No")} />
+                        <span className="text-gray-600">No</span>
+                      </label>
+                    </div>
                   </td>
                   <td>
-                    <select className="pro-select text-xs py-1" value={task.priority} onChange={e => updateTask(task.id, "priority", e.target.value)}>
+                    <select className="pro-select text-xs py-1 w-full" value={task.priority} onChange={e => updateTask(task.id, "priority", e.target.value)}>
                       <option value="">—</option><option>High</option><option>Medium</option><option>Low</option>
                     </select>
                   </td>
                   <td>
-                    <select className="pro-select text-xs py-1" value={task.taskType} onChange={e => updateTask(task.id, "taskType", e.target.value)}>
+                    <select className="pro-select text-xs py-1 w-full" value={task.taskType} onChange={e => updateTask(task.id, "taskType", e.target.value)}>
                       <option value="">—</option><option>Development</option><option>Bug Fix</option><option>Testing</option><option>Review</option><option>Documentation</option><option>Meeting</option><option>Research</option>
                     </select>
                   </td>
-                  <td><input className="pro-input py-1 text-xs" type="text" placeholder="PROJ-101" value={task.ticketRef} onChange={e => updateTask(task.id, "ticketRef", e.target.value)} /></td>
-                  <td><input className="pro-input py-1 text-xs min-w-[160px]" type="text" placeholder="Describe task…" value={task.description} onChange={e => updateTask(task.id, "description", e.target.value)} /></td>
-                  <td><input className="pro-input py-1 text-xs" type="text" placeholder="Module" value={task.module} onChange={e => updateTask(task.id, "module", e.target.value)} /></td>
+                  <td><input className="pro-input py-1 text-xs w-full" type="text" placeholder="PROJ-101" value={task.ticketRef} onChange={e => updateTask(task.id, "ticketRef", e.target.value)} /></td>
+                  <td><input className="pro-input py-1 text-xs w-full" type="text" placeholder="Describe task…" value={task.description} onChange={e => updateTask(task.id, "description", e.target.value)} /></td>
+                  <td><input className="pro-input py-1 text-xs w-full" type="text" placeholder="Module" value={task.module} onChange={e => updateTask(task.id, "module", e.target.value)} /></td>
                   <td>
-                    <select className="pro-select text-xs py-1" value={task.status} onChange={e => updateTask(task.id, "status", e.target.value)}>
+                    <select className="pro-select text-xs py-1 w-full" value={task.status} onChange={e => updateTask(task.id, "status", e.target.value)}>
                       <option value="">—</option><option value="done">Done</option><option value="ip">In Progress</option><option value="blocked">Blocked</option><option value="todo">To Do</option>
                     </select>
                     {task.status && (
@@ -447,12 +444,52 @@ export default function DailyAccomplishmentReport() {
                       </span>
                     )}
                   </td>
-                  <td><input className="pro-input py-1 text-xs text-center w-16" type="number" min={0} max={100} step={5} placeholder="0" value={task.percentDone} onChange={e => updateTask(task.id, "percentDone", e.target.value)} /></td>
-                  <td><input className="pro-input py-1 text-xs text-center w-16" type="number" min={0} step={0.5} placeholder="0" value={task.estHrs} onChange={e => updateTask(task.id, "estHrs", e.target.value)} /></td>
-                  <td><input className="pro-input py-1 text-xs text-center w-16" type="number" min={0} step={0.5} placeholder="0" value={task.actualHrs} onChange={e => updateTask(task.id, "actualHrs", e.target.value)} /></td>
-                  <td><input className="pro-input py-1 text-xs min-w-[130px]" type="text" placeholder="Output description" value={task.output} onChange={e => updateTask(task.id, "output", e.target.value)} /></td>
-                  <td><input className="pro-input py-1 text-xs min-w-[110px]" type="text" placeholder="Commit/PR URL" value={task.commitLink} onChange={e => updateTask(task.id, "commitLink", e.target.value)} /></td>
-                  <td><input className="pro-input py-1 text-xs min-w-[110px]" type="text" placeholder="Remarks" value={task.remarks} onChange={e => updateTask(task.id, "remarks", e.target.value)} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* TABLE 2: Details — % Done, Est. Hrs, Actual Hrs, Output, Commit, Remarks, Delete */}
+        <div className="overflow-x-auto rounded-xl border border-gray-100 mt-3">
+          <table className="pro-table" style={{ width: "100%", tableLayout: "fixed", minWidth: "800px" }}>
+            <colgroup>
+              <col style={{ width: "40px" }} />
+              <col style={{ width: "120px" }} />
+              <col style={{ width: "120px" }} />
+              <col style={{ width: "120px" }} />
+              <col />
+              <col style={{ width: "180px" }} />
+              <col style={{ width: "150px" }} />
+              <col style={{ width: "50px" }} />
+            </colgroup>
+            <thead>
+              <tr>
+                {["#","% Done","Est. Hrs","Actual Hrs","Output / Deliverable","Commit / PR","Remarks",""].map(h => (
+                  <th key={h} style={{ whiteSpace: "nowrap" }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {tasks.map(task => (
+                <tr key={task.id}>
+                  <td className="text-center text-gray-400 font-semibold text-xs">{task.id}</td>
+                  <td><input className="pro-input py-1 text-xs text-center w-full" type="number" min={0} max={100} step={5} placeholder="0" value={task.percentDone} onChange={e => updateTask(task.id, "percentDone", e.target.value)} /></td>
+                  <td><input className="pro-input py-1 text-xs text-center w-full" type="number" min={0} step={0.5} placeholder="0" value={task.estHrs} onChange={e => updateTask(task.id, "estHrs", e.target.value)} /></td>
+                  <td><input className="pro-input py-1 text-xs text-center w-full" type="number" min={0} step={0.5} placeholder="0" value={task.actualHrs} onChange={e => updateTask(task.id, "actualHrs", e.target.value)} /></td>
+                  <td><input className="pro-input py-1 text-xs w-full" type="text" placeholder="Output description" value={task.output} onChange={e => updateTask(task.id, "output", e.target.value)} /></td>
+                  <td><input className="pro-input py-1 text-xs w-full" type="text" placeholder="Commit/PR URL" value={task.commitLink} onChange={e => updateTask(task.id, "commitLink", e.target.value)} /></td>
+                  <td><input className="pro-input py-1 text-xs w-full" type="text" placeholder="Remarks" value={task.remarks} onChange={e => updateTask(task.id, "remarks", e.target.value)} /></td>
+                  <td className="text-center">
+                    <button
+                      type="button"
+                      onClick={() => deleteRow(task.id)}
+                      className="text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg p-1 transition-all"
+                      title="Delete row"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
