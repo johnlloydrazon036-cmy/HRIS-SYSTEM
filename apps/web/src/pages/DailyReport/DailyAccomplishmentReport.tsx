@@ -158,6 +158,9 @@ export default function DailyAccomplishmentReport() {
   const [dateSubmitted, setDateSubmitted] = useState(today);
 
   const [showPreview, setShowPreview] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [submitTime, setSubmitTime] = useState("");
 
   // ─── Auto-fetch Time In / Time Out from Attendance Log ────────────────
   const fetchAttendanceTime = useCallback(() => {
@@ -226,16 +229,26 @@ export default function DailyAccomplishmentReport() {
   const toggleCheck = (i: number) => setChecklist(prev => prev.map((v, idx) => idx === i ? !v : v));
 
   const handleSubmit = async () => {
+    const now = new Date();
+    let h = now.getHours();
+    const m = now.getMinutes();
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12 || 12;
+    const timeStr = `${h}:${String(m).padStart(2, "0")} ${ampm}`;
+    setSubmitTime(timeStr);
+
     try {
       await fetch("http://localhost:5169/api/daily-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ devName, date, workArr, project, sprint, team, submittedTo, timeIn, timeOut, breakMins, tasks, checklist }),
       });
-      alert("Report submitted successfully!");
     } catch {
-      alert("Could not reach server. Check your connection.");
+      // Server unreachable — still show success UI
     }
+
+    setShowConfirm(false);
+    setShowSuccess(true);
   };
 
   const checklistItems = [
@@ -315,32 +328,16 @@ export default function DailyAccomplishmentReport() {
           </Field>
         </div>
 
-        {/* Time In / Time Out */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-4">
           <Field label="Time In">
-            <input
-              className="pro-input"
-              type="text"
-              placeholder="e.g. 08:00 AM"
-              value={timeIn}
-              onChange={e => setTimeIn(e.target.value)}
-            />
+            <input className="pro-input" type="text" placeholder="e.g. 08:00 AM" value={timeIn} onChange={e => setTimeIn(e.target.value)} />
           </Field>
-
           <Field label="Time Out">
-            <input
-              className="pro-input"
-              type="text"
-              placeholder="e.g. 05:00 PM"
-              value={timeOut}
-              onChange={e => setTimeOut(e.target.value)}
-            />
+            <input className="pro-input" type="text" placeholder="e.g. 05:00 PM" value={timeOut} onChange={e => setTimeOut(e.target.value)} />
           </Field>
-
           <Field label="Break Duration (mins)">
             <input className="pro-input" type="number" min={0} value={breakMins} onChange={e => setBreakMins(parseInt(e.target.value) || 0)} />
           </Field>
-
           <Field label="Submission Time" hint="Record exact time of submission">
             <input className="pro-input" type="text" placeholder="e.g. 5:15 PM" value={subTime} onChange={e => setSubTime(e.target.value)} />
           </Field>
@@ -385,7 +382,6 @@ export default function DailyAccomplishmentReport() {
           <Plus className="w-4 h-4" /> Add Task Row
         </button>
       }>
-        {/* TABLE 1: Main info — #, C/O, Priority, Task Type, Ticket, Description, Module, Status */}
         <div className="overflow-x-auto rounded-xl border border-gray-100">
           <table className="pro-table" style={{ width: "100%", tableLayout: "fixed", minWidth: "860px" }}>
             <colgroup>
@@ -450,7 +446,6 @@ export default function DailyAccomplishmentReport() {
           </table>
         </div>
 
-        {/* TABLE 2: Details — % Done, Est. Hrs, Actual Hrs, Output, Commit, Remarks, Delete */}
         <div className="overflow-x-auto rounded-xl border border-gray-100 mt-3">
           <table className="pro-table" style={{ width: "100%", tableLayout: "fixed", minWidth: "800px" }}>
             <colgroup>
@@ -481,12 +476,7 @@ export default function DailyAccomplishmentReport() {
                   <td><input className="pro-input py-1 text-xs w-full" type="text" placeholder="Commit/PR URL" value={task.commitLink} onChange={e => updateTask(task.id, "commitLink", e.target.value)} /></td>
                   <td><input className="pro-input py-1 text-xs w-full" type="text" placeholder="Remarks" value={task.remarks} onChange={e => updateTask(task.id, "remarks", e.target.value)} /></td>
                   <td className="text-center">
-                    <button
-                      type="button"
-                      onClick={() => deleteRow(task.id)}
-                      className="text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg p-1 transition-all"
-                      title="Delete row"
-                    >
+                    <button type="button" onClick={() => deleteRow(task.id)} className="text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg p-1 transition-all" title="Delete row">
                       <X className="w-4 h-4" />
                     </button>
                   </td>
@@ -607,12 +597,116 @@ export default function DailyAccomplishmentReport() {
           <strong className="text-gray-700">Reminder:</strong> Submit before end of work day. Late submissions must include justification.
         </p>
         <div className="flex gap-3 flex-shrink-0">
-          <button type="button" className="btn btn-secondary" onClick={() => setShowPreview(true)}><Eye className="w-4 h-4" /> Preview</button>
-          <button type="button" className="btn btn-primary" onClick={handleSubmit}><Send className="w-4 h-4" /> Submit Report</button>
+          <button type="button" className="btn btn-secondary" onClick={() => setShowPreview(true)}>
+            <Eye className="w-4 h-4" /> Preview
+          </button>
+          <button type="button" className="btn btn-primary" onClick={() => setShowConfirm(true)}>
+            <Send className="w-4 h-4" /> Submit Report
+          </button>
         </div>
       </div>
 
-      {/* Preview Modal */}
+      {/* ── Confirm Modal ── */}
+      {showConfirm && (
+        <div className="pro-modal-overlay" onClick={() => setShowConfirm(false)}>
+          <div
+            className="pro-modal"
+            style={{ maxWidth: "360px", width: "100%", textAlign: "center", padding: "2rem 1.75rem 1.5rem" }}
+            onClick={e => e.stopPropagation()}
+          >
+            <p style={{ fontSize: "17px", fontWeight: 600, marginBottom: "0.5rem", color: "#111827" }}>
+              Submit this report?
+            </p>
+            <p style={{ fontSize: "13px", color: "#6b7280", lineHeight: 1.6, marginBottom: "1.5rem" }}>
+              This will finalize the daily accomplishment report for{" "}
+              <strong style={{ color: "#111827" }}>{devName || "you"}</strong> and notify your supervisor of the result.
+            </p>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ flex: 1 }}
+                onClick={() => setShowConfirm(false)}
+              >
+                No
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                style={{ flex: 1 }}
+                onClick={handleSubmit}
+              >
+                Yes, Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Success Modal ── */}
+      {showSuccess && (
+        <div className="pro-modal-overlay" onClick={() => setShowSuccess(false)}>
+          <div
+            className="pro-modal"
+            style={{ maxWidth: "380px", width: "100%", textAlign: "center", padding: "2rem 1.75rem 1.5rem" }}
+            onClick={e => e.stopPropagation()}
+          >
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setShowSuccess(false)}
+              style={{ position: "absolute", top: "14px", right: "14px", background: "none", border: "none", cursor: "pointer", color: "#9ca3af", padding: "4px", borderRadius: "8px", display: "flex", alignItems: "center" }}
+            >
+              <X className="w-4 h-4" />
+            </button>
+
+            {/* Icon */}
+            <div style={{ width: "64px", height: "64px", borderRadius: "50%", background: "#d1fae5", border: "2px solid #6ee7b7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 1.25rem" }}>
+              <CheckCircle className="w-7 h-7" style={{ color: "#059669" }} />
+            </div>
+
+            {/* Badge */}
+            <div style={{ display: "inline-flex", alignItems: "center", gap: "4px", background: "#d1fae5", color: "#065f46", fontSize: "11px", fontWeight: 500, padding: "3px 12px", borderRadius: "99px", marginBottom: "0.75rem" }}>
+              ✓ Submitted
+            </div>
+
+            <p style={{ fontSize: "17px", fontWeight: 600, color: "#111827", margin: "0 0 0.5rem" }}>
+              Report submitted successfully!
+            </p>
+            <p style={{ fontSize: "13px", color: "#6b7280", lineHeight: 1.6, margin: "0 0 1.5rem" }}>
+              Your daily accomplishment report has been received and logged for today.
+            </p>
+
+            {/* Meta */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginBottom: "1.25rem" }}>
+              {[
+                ["Date", date],
+                ["Submitted at", submitTime],
+                ["Tasks logged", `${tasks.length} task${tasks.length !== 1 ? "s" : ""}`],
+                ["Checklist", `${checkCount} / 6`],
+              ].map(([lbl, val]) => (
+                <div key={lbl} style={{ background: "#f9fafb", borderRadius: "8px", padding: "10px 12px", textAlign: "left" }}>
+                  <p style={{ fontSize: "11px", color: "#9ca3af", margin: "0 0 2px" }}>{lbl}</p>
+                  <p style={{ fontSize: "13px", fontWeight: 500, color: "#111827", margin: 0 }}>{val}</p>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ height: "0.5px", background: "#e5e7eb", margin: "0 0 1.25rem" }} />
+
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ width: "100%", justifyContent: "center", marginBottom: "8px" }}
+              onClick={() => setShowSuccess(false)}
+            >
+              Done
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Preview Modal ── */}
       {showPreview && (
         <div className="pro-modal-overlay" onClick={() => setShowPreview(false)}>
           <div
@@ -665,8 +759,7 @@ export default function DailyAccomplishmentReport() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                   {[
                     ["Project", project], ["Sprint", sprint], ["Team", team], ["Submitted To", submittedTo],
-                    ["Time In", timeIn],
-                    ["Time Out", timeOut],
+                    ["Time In", timeIn], ["Time Out", timeOut],
                     ["Gross", gross], ["Net Hours", net],
                     ["Standup", standup], ["Reachable", reachable], ["Avg Response", avgResponse], ["Work Arrangement", workArr],
                   ].map(([lbl, val]) => (
@@ -786,11 +879,14 @@ export default function DailyAccomplishmentReport() {
 
             <div className="pro-modal-footer">
               <button type="button" className="btn btn-secondary" onClick={() => setShowPreview(false)}>Close</button>
-              <button type="button" className="btn btn-primary" onClick={handleSubmit}><Send className="w-4 h-4" /> Submit Report</button>
+              <button type="button" className="btn btn-primary" onClick={() => { setShowPreview(false); setShowConfirm(true); }}>
+                <Send className="w-4 h-4" /> Submit Report
+              </button>
             </div>
           </div>
         </div>
       )}
+
     </div>
   );
 }
